@@ -22,9 +22,9 @@ clamp()
 
 sx=100
 sy=80
-px=0.3
-py=1.0
-iterations=5
+px=1.0
+py=0.3
+iterations=10
 charset="azertyuiop-"
 zoom=1.4
 
