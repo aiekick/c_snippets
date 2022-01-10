@@ -13,7 +13,7 @@ struct dvec2{double x=0.0,y=0.0; dvec2(const double& vx, const double& vy) : x(v
 dvec4 ComputeImage(const dvec2& vFragCoord, const dvec2& vSize)
 {
 	dvec4 pixelColor;
-	const double& zoom = 1.4;
+	const double& zoom = 0.93;
 	const double& threshold = 0.14;
 	const double mns = zoom / dmin(vSize.x, vSize.y);
 	double zx = (vFragCoord.x * 2.0 - (double)vSize.x) * mns;
@@ -45,53 +45,49 @@ dvec4 ComputeImage(const dvec2& vFragCoord, const dvec2& vSize)
 
 int main ()
 {
-	int w = 2560; /* Put here what ever width you want */
-	int h = 1440; /* Put here what ever height you want */
+	const int& w = 2560;
+	const int& h = 1440;
 	
-	FILE *f = nullptr;
-	size_t headersize = 54;
-	size_t datasize = 3*w*h;
-	size_t filesize = headersize + datasize;  //w is your image width, h is image height, both int
+	const size_t datasize = 3*w*h;
 	auto img = new uint8_t[datasize];
 	memset(img,0,datasize);
-	int x,y,r,g,b;
 	
+	size_t x,y;
 	dvec4 pixelColor;
 	for(int i=0; i<w; ++i) {
 		for(int j=0; j<h; ++j) {
 			x=i; y=(h-1)-j;
 			pixelColor = ComputeImage(dvec2((double)x,(double)y), dvec2((double)w,(double)h));
-			r = (int)(pixelColor.x * 255.0);
-			g = (int)(pixelColor.y * 255.0);
-			b = (int)(pixelColor.z * 255.0);
-			img[(x+y*w)*3+2] = (uint8_t)r;
-			img[(x+y*w)*3+1] = (uint8_t)g;
-			img[(x+y*w)*3+0] = (uint8_t)b;
+			img[(x+y*w)*3+2] = (uint8_t)(pixelColor.x * 255.0);
+			img[(x+y*w)*3+1] = (uint8_t)(pixelColor.y * 255.0);
+			img[(x+y*w)*3+0] = (uint8_t)(pixelColor.z * 255.0);
 		}
 	}
 	
-	unsigned char bmpfileheader[14] = {'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0};
+	const size_t headersize = 54;
+	const size_t filesize = headersize + datasize;
+	
+	unsigned char bmpfileheader[14] = {'B','M', 0,0,0,0, 0,0, 0,0, headersize,0,0,0};
+	bmpfileheader[2] = (uint8_t)(filesize);
+	bmpfileheader[3] = (uint8_t)(filesize>> 8);
+	bmpfileheader[4] = (uint8_t)(filesize>>16);
+	bmpfileheader[5] = (uint8_t)(filesize>>24);
+	
 	unsigned char bmpinfoheader[40] = {40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0};
+	bmpinfoheader[4] = (uint8_t)(w);
+	bmpinfoheader[5] = (uint8_t)(w>> 8);
+	bmpinfoheader[6] = (uint8_t)(w>>16);
+	bmpinfoheader[7] = (uint8_t)(w>>24);
+	bmpinfoheader[8] = (uint8_t)(h);
+	bmpinfoheader[9] = (uint8_t)(h>> 8);
+	bmpinfoheader[10] = (uint8_t)(h>>16);
+	bmpinfoheader[11] = (uint8_t)(h>>24);
+	
 	unsigned char bmppad[3] = {0,0,0};
-	
-	bmpfileheader[ 2] = (unsigned char)(filesize    );
-	bmpfileheader[ 3] = (unsigned char)(filesize>> 8);
-	bmpfileheader[ 4] = (unsigned char)(filesize>>16);
-	bmpfileheader[ 5] = (unsigned char)(filesize>>24);
-	
-	bmpinfoheader[ 4] = (unsigned char)(       w    );
-	bmpinfoheader[ 5] = (unsigned char)(       w>> 8);
-	bmpinfoheader[ 6] = (unsigned char)(       w>>16);
-	bmpinfoheader[ 7] = (unsigned char)(       w>>24);
-	bmpinfoheader[ 8] = (unsigned char)(       h    );
-	bmpinfoheader[ 9] = (unsigned char)(       h>> 8);
-	bmpinfoheader[10] = (unsigned char)(       h>>16);
-	bmpinfoheader[11] = (unsigned char)(       h>>24);
-	
-	f = fopen("img.bmp","wb");
+	auto f = fopen("img.bmp","wb");
 	fwrite(bmpfileheader,1,14,f);
 	fwrite(bmpinfoheader,1,40,f);
-	for(int i=0; i<h; i++)
+	for(int i=0; i<h; ++i)
 	{
 		fwrite(img+(w*(h-i-1)*3),3,w,f);
 		fwrite(bmppad,1,(4-(w*3)%4)%4,f);
