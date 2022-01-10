@@ -10,14 +10,18 @@ struct dvec2{double x=0.0,y=0.0; dvec2(const double& vx, const double& vy) : x(v
 #define dmax(a, b) (((a)>(b)) ? (a) : (b))
 #define dclamp(v, inf, sup) dmin(dmax(v,inf),sup)
 
-dvec4 ComputeImage(const dvec2& vFragCoord, const dvec2& vSize)
+dvec4 ComputeImage(
+	const size_t& cx,
+	const size_t& cy,
+	const size_t& sx,
+	const size_t& sy)
 {
 	dvec4 pixelColor;
 	const double& zoom = 0.93;
 	const double& threshold = 0.14;
-	const double mns = zoom / dmin(vSize.x, vSize.y);
-	double zx = (vFragCoord.x * 2.0 - (double)vSize.x) * mns;
-	double zy = (vFragCoord.y * 2.0 - (double)vSize.y) * mns;
+	const double mns = zoom / dmin(sx, sy);
+	double zx = ((double)cx * 2.0 - (double)sx) * mns;
+	double zy = ((double)cy * 2.0 - (double)sy) * mns;
 	const double& px = 1.0;
 	const double& py = 0.3;
 	double d = 0.0;
@@ -52,12 +56,12 @@ int main ()
 	auto img = new uint8_t[datasize];
 	memset(img,0,datasize);
 	
-	size_t x,y;
+	int x,y;
 	dvec4 pixelColor;
 	for(int i=0; i<w; ++i) {
 		for(int j=0; j<h; ++j) {
 			x=i; y=(h-1)-j;
-			pixelColor = ComputeImage(dvec2((double)x,(double)y), dvec2((double)w,(double)h));
+			pixelColor = ComputeImage(x,y, w,h);
 			img[(x+y*w)*3+2] = (uint8_t)(pixelColor.x * 255.0);
 			img[(x+y*w)*3+1] = (uint8_t)(pixelColor.y * 255.0);
 			img[(x+y*w)*3+0] = (uint8_t)(pixelColor.z * 255.0);
