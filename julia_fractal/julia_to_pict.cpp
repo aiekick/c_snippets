@@ -79,16 +79,16 @@ int main ()
 	
 	unsigned char bmpinfoheader[40] = {40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0};
 	bmpinfoheader[4] = (uint8_t)(w);
-	bmpinfoheader[5] = (uint8_t)(w>> 8);
+	bmpinfoheader[5] = (uint8_t)(w>>8);
 	bmpinfoheader[6] = (uint8_t)(w>>16);
 	bmpinfoheader[7] = (uint8_t)(w>>24);
 	bmpinfoheader[8] = (uint8_t)(h);
-	bmpinfoheader[9] = (uint8_t)(h>> 8);
+	bmpinfoheader[9] = (uint8_t)(h>>8);
 	bmpinfoheader[10] = (uint8_t)(h>>16);
 	bmpinfoheader[11] = (uint8_t)(h>>24);
 	
 	unsigned char bmppad[3] = {0,0,0};
-	auto f = fopen("img.bmp","wb");
+	auto f = fopen("julia.bmp","wb");
 	fwrite(bmpfileheader,1,14,f);
 	fwrite(bmpinfoheader,1,40,f);
 	for(int i=0; i<h; ++i)
